@@ -1,0 +1,63 @@
+# -*- coding: utf-8 -*-
+from imutils.video import VideoStream
+from pyzbar import pyzbar
+import argparse
+import datetime
+import imutils
+import time
+import cv2
+import csv
+import urllib
+
+url="http://192.169.1.100:8080/shot.jpg"
+
+# construct the argument parser and parse the arguments
+ap = argparse.ArgumentParser()
+ap.add_argument("-o", "--output", type=str, default="barcodes.csv",help="path to output CSV file containing barcodes")
+args = vars(ap.parse_args())
+
+time.sleep(1.0)
+# Write the barcodes found thus so far
+csv = open(args["output"], "w")
+found = set()
+total = 0
+count = dict()
+c=0
+t =0 
+import csv
+with open('Database.csv', 'r') as csvfile:
+  reader = csv.reader(csvfile)
+with open('Answer.csv', 'w', newline='') as ans:
+  ans_write = csv.writer(ans, delimiter=' ')
+# Now for the continuous video stream
+while True:
+  # Need to resize the video frame to a width of 400 pixels(max)
+  imgPath=urllib.urlopen(i)
+  imgNp=np.array(bytearray(imgPath.read()),dtype=np.uint8)
+  img=cv2.imdecode(imgNp,-1)
+  frame = imutils.resize(img, width=400)
+  # Pyzbar helps detect the barcodes in the video frame
+  barcodes = pyzbar.decode(frame)
+  #time.sleep(1.0)
+  for barcode in barcodes:
+    # To form a box location around the barcode in  the stream
+    #(x, y, w, h) = barcode.rect
+    #cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
+    # We want the barcode data to be in string form instead of bytes
+    barcodeData = barcode.data.decode("utf-8")
+    barcodeType = barcode.type
+    found.add(barcodeData)
+    #for comparing with the existing Database:
+    import csv
+    with open('Database.csv', 'r') as csvfile:
+      reader = csv.reader(csvfile)
+      for row in reader:
+        if int(barcodeData) == int(row[0]):
+          t = t + float(row[2])
+          t1 =  "{:.2f}".format(t) 
+          import csv
+          with open('Answer.csv', 'a', newline='') as ans:
+            ans_write = csv.writer(ans, delimiter=',')
+            ans_write.writerow([row[1], row[2]])
+            ans_write.writerow([t1])
+            print(row[1],row[2])

@@ -1,0 +1,3 @@
+<launch>
+    <rosparam file="$(find bot_nav)/params/locations.yaml" command="load"/>
+</launch>
