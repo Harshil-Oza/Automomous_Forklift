@@ -1,0 +1,78 @@
+
+# Position Controllers ---------------------------------------
+lift_position_controller:
+  type: effort_controllers/JointPositionController
+  joint: r_rod_to_lift
+  pid: {p: 5000.0, i: 100, d: 500.0}
+pull_position_controller:
+  type: effort_controllers/JointPositionController
+  joint: lift_to_pull_mech_v
+  pid: {p: 2000.0, i: 100, d: 0.0}
+Rf_wheel_position_controller:
+  type: effort_controllers/JointPositionController
+  joint: chassis_to_rf_wheel
+  pid: {p: 2000.0, i: 100, d: 0.0}
+Rb_wheel_position_controller:
+  type: effort_controllers/JointPositionController
+  joint: chassis_to_rb_wheel
+  pid: {p: 2000.0, i: 100, d: 0.0}  
+Lf_wheel_position_controller:
+  type: effort_controllers/JointPositionController
+  joint: chassis_to_lf_wheel
+  pid: {p: 2000.0, i: 100, d: 0.0}
+Lb_wheel_position_controller:
+  type: effort_controllers/JointPositionController
+  joint: chassis_to_lb_wheel
+  pid: {p: 2000.0, i: 100, d: 0.0}  
+
+
+  
+    <m_box name="load" size="${lox} ${loy} ${loz}" origin_rpy="0.0 0.0 0.0" origin_xyz="0.0 0.0 1.5"
+        mass="${lom}"
+        ixx="${lom*(loz*loz+loy*loy)/12}" ixy="0" ixz="0"
+        iyy="${lom*(lox*lox+loz*loz)/12}" iyz="0"
+        izz="${lom*(loy*loy+lox*lox)/12}"/>
+
+    <f_joint name="chassis_to_r_rod" type="fixed" origin_xyz="0.0 0.0 0.01" origin_rpy="0.0 0.0 0.0"
+          parent="lift" child="load"/>    
+
+          <?xml version="1.0"?>
+<launch>
+    
+      <group ns="/mrm"> 
+        <!-- Robot model -->
+        <param name="robot_description" command="$(find xacro)/xacro --inorder '$(find my_urdf)/urdf/forklift.xacro'" />
+        <arg name="x" default="0"/>
+        <arg name="y" default="0"/>
+        <arg name="z" default="0.42"/>
+        
+        <!-- Spawn the robot model -->
+        <node name="mybot_spawn" pkg="gazebo_ros" type="spawn_model" output="screen"
+              args="-urdf -param robot_description -model mrm -x $(arg x) -y $(arg y) -z $(arg z)" />
+
+        <!-- load controllers -->
+        <rosparam command="load" file="$(find my_urdf)/config/pro_joints.yaml"/>
+
+      <!--launch controller-->     
+      <node name="controller_spawner" pkg="controller_manager" type="spawner"
+      respawn="false" output="screen" ns="/mrm"
+        args="--namespace=/mrm
+            joint_state_controller
+            lift_position_controller
+            --timeout 60">
+      </node>
+      
+      <!-- rqt -->
+      <node name="rqt_reconfigure" pkg="rqt_reconfigure" type="rqt_reconfigure"/>
+      <node name="rqt_publisher" pkg="rqt_publisher" type="rqt_publisher"/> 
+
+</group>
+
+      
+</launch>
+regions= [min(msg.ranges[0,143]),
+            min(msg.ranges[144,287]),
+            min(msg.ranges[288,431]),
+            min(msg.ranges[432,575]),
+            min(msg.ranges[576,719]),
+            ]  

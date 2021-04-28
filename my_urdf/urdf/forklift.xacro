@@ -1,0 +1,214 @@
+<?xml version="1.0"?>
+
+<robot name="forklift"  xmlns:xacro="http://www.ros.org/wiki/xacro">
+<xacro:include filename="$(find my_urdf)/urdf/joints_links.xacro"/>
+<xacro:include filename="$(find my_urdf)/urdf/forklift.plugin.xacro"/>
+
+<!-- chassis properties-->
+<xacro:property name="cx" value="0.7"/>     height=20.5cm
+<xacro:property name="cy" value="0.5"/>     length=41cm
+<xacro:property name="cz" value="0.6"/>     width=41cm
+<xacro:property name="cm" value="30"/>      weight=13.8kg
+
+<!-- wheel properties-->
+<xacro:property name="wh" value="0.06"/>  weight=1100gm
+<xacro:property name="wr" value="0.12"/>   height=3cm
+<xacro:property name="wm" value="0.7"/>
+<!-- rod properties-->
+<xacro:property name="rx" value="0.1"/>       weight=230gm
+<xacro:property name="ry" value="0.1"/>       width=18.5cm
+<xacro:property name="rz" value="3.0"/>       length=3cm
+<xacro:property name="rm" value="5"/>         height=4mm
+
+<!-- lift properties-->
+<xacro:property name="lx" value="0.55"/>
+<xacro:property name="ly" value="0.5"/>        distance btw forks=11.5(internally)
+<xacro:property name="lz" value="0.02"/>
+<xacro:property name="lm" value="2"/>
+
+<!-- pull_mech_v properties-->
+<xacro:property name="vpx" value="0.08"/>
+<xacro:property name="vpy" value="0.06"/>
+<xacro:property name="vpz" value="0.24"/>
+<xacro:property name="vpm" value="0.5"/>
+
+<!-- pull_mech_h properties-->
+<xacro:property name="hph" value="0.15"/>
+<xacro:property name="hpr" value="0.03"/>
+<xacro:property name="hpm" value="0.5"/>
+
+<!-- load properties-->
+<xacro:property name="lox" value="0.55"/>
+<xacro:property name="loy" value="0.5"/>
+<xacro:property name="loz" value="0.4"/>
+<xacro:property name="lom" value="5"/>
+
+<!-- lazer_scanner properties-->
+<xacro:property name="lsh" value="0.1"/>
+<xacro:property name="lsr" value="0.06"/>
+<xacro:property name="lsm" value="0.7"/>
+
+<m_box name="chassis" size="${cx} ${cy} ${cz}" origin_rpy="0.0 0.0 0.0" origin_xyz="0.0 0.0 0.42"
+        mass="${cm}"
+        ixx="${cm*(cz*cz+cy*cy)/12}" ixy="0" ixz="0"
+        iyy="${cm*(cx*cx+cz*cz)/12}" iyz="0"
+        izz="${cm*(cy*cy+cx*cx)/12}"/>
+
+<m_cylinder name="rf_wheel" length="${wh}" radius="${wr}" origin_rpy="1.57 0.0 0.0" origin_xyz="0.0 0.0 0.0"
+             mass="${wm}"
+              ixx="${wm*(3*wr*wr+wh*wh)/12}" ixy="0" ixz="0"
+              iyy="${wm*(3*wr*wr+wh*wh)/12}" iyz="0"
+              izz="${(wm*wr*wr)/2}"/>
+ 
+<c_joint name="chassis_to_rf_wheel" type="continuous" origin_xyz="0.32 0.28 0.12" origin_rpy="0.0 0.0 0.0"
+     axis_xyz="0 1 0" parent="chassis" child="rf_wheel" />
+
+    <transmission name="trans_chassis_to_rf_wheel">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="chassis_to_rf_wheel">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor_chassis_to_rf_wheel">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+<m_cylinder name="lf_wheel" length="${wh}" radius="${wr}" origin_rpy="1.57 0.0 0.0" origin_xyz="0.0 0.0 0.0"
+             mass="${wm}"
+              ixx="${wm*(3*wr*wr+wh*wh)/12}" ixy="0" ixz="0"
+              iyy="${wm*(3*wr*wr+wh*wh)/12}" iyz="0"
+              izz="${(wm*wr*wr)/2}"/>
+ 
+    <c_joint name="chassis_to_lf_wheel" type="continuous" origin_xyz="0.32 -0.28 0.12" origin_rpy="0.0 0.0 0.0"
+         axis_xyz="0 1 0" parent="chassis" child="lf_wheel"/>
+
+    <transmission name="trans_chassis_to_lf_wheel">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="chassis_to_lf_wheel">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor_chassis_to_lf_wheel">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+ 
+
+<link name="caster">
+        <inertial>
+        <mass value="0.5" />
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0" />
+        <inertia ixx="0.001" ixy="0.0" ixz="0.0" iyy="0.001" iyz="0.0" izz="0.001" />
+        </inertial>
+        <collision>
+        <origin rpy="0.0 0.0 0.0" xyz="0.0 0.0 0.0" />
+        <geometry>
+          <sphere radius="0.1" />
+        </geometry>
+      </collision>
+        <visual>
+            <geometry>
+                <sphere radius="0.1"/>
+            </geometry>
+        </visual>
+    </link>
+
+   <f_joint name="chassis_to_caster" type="fixed" origin_xyz="-0.2 0.0 0.1" origin_rpy="0.0 0.0 0.0"
+          parent="chassis" child="caster"/>  
+
+    <m_box name="r_rod" size="${rx} ${ry} ${rz}" origin_rpy="0.0 0.0 0.0" origin_xyz="0.0 0.0 1.5"
+        mass="${rm}"
+        ixx="${rm*(rz*rz+ry*ry)/12}" ixy="0" ixz="0"
+        iyy="${rm*(rx*rx+rz*rz)/12}" iyz="0"
+        izz="${rm*(ry*ry+rx*rx)/12}"/>
+
+    <f_joint name="chassis_to_r_rod" type="fixed" origin_xyz="0.4 0.18 0.05" origin_rpy="0.0 0.0 0.0"
+          parent="chassis" child="r_rod"/>
+
+     <m_box name="l_rod" size="${rx} ${ry} ${rz}" origin_rpy="0.0 0.0 0.0" origin_xyz="0.0 0.0 1.5"
+        mass="${rm}"
+        ixx="${rm*(rz*rz+ry*ry)/12}" ixy="0" ixz="0"
+        iyy="${rm*(rx*rx+rz*rz)/12}" iyz="0"
+        izz="${rm*(ry*ry+rx*rx)/12}"/>
+
+    <f_joint name="chassis_to_l_rod" type="fixed" origin_xyz="0.4 -0.18 0.05" origin_rpy="0.0 0.0 0.0"
+          parent="chassis" child="l_rod"/>     
+           
+    <m_box name="lift" size="${lx} ${ly} ${lz}" origin_rpy="0.0 0.0 0.0" origin_xyz="0.0 0.0 0.0"
+        mass="${lm}"
+        ixx="${lm*(lz*lz+ly*ly)/12}" ixy="0" ixz="0"
+        iyy="${lm*(lx*lx+lz*lz)/12}" iyz="0"
+        izz="${lm*(ly*ly+lx*lx)/12}"/>
+
+    <m_joint name="chassis_to_lift" type="prismatic" origin_xyz="${(rx+lx/2+cx/2)} 0 0.06" origin_rpy="0.0 0.0 0.0"
+         axis_xyz="0 0 1" parent="chassis" child="lift" limit_e="1000.0" limit_v="0.5" 
+         limit_l="0" limit_u="0.2"/>
+
+    <transmission name="trans_chassis_to_lift">
+      <type>transmission_interface/SimpleTransmission</type> 
+      <joint name="chassis_to_lift">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor_chassis_to_lift">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission> 
+
+    <m_box name="load" size="${lox} ${loy} ${loz}" origin_rpy="0.0 0.0 0.0" origin_xyz="0.0 0.0 ${loz/2+lz/2}"
+        mass="${lom}"
+        ixx="${lom*(loz*loz+loy*loy)/12}" ixy="0" ixz="0"
+        iyy="${lom*(lox*lox+loz*loz)/12}" iyz="0"
+        izz="${lom*(loy*loy+lox*lox)/12}"/>
+
+    <f_joint name="load_to_lift" type="fixed" origin_xyz="0.0 0.0 0.01" origin_rpy="0.0 0.0 0.0"
+          parent="lift" child="load"/>
+<!--
+<m_box name="pull_mech_v" size="${vpx} ${vpy} ${vpz}" origin_rpy="0.0 0.0 0.0" origin_xyz="0.0 0.0 0.12"
+        mass="${vpm}"
+        ixx="${vpm*(vpz*vpz+vpy*vpy)/12}" ixy="0" ixz="0"
+        iyy="${lm*(vpx*vpx+vpz*vpz)/12}" iyz="0"
+        izz="${lm*(vpy*vpy+vpx*vpx)/12}"/>
+
+    <m_joint name="lift_to_pull_mech_v" type="prismatic" origin_xyz="${-(lx/2)+(vpx/2)} 0.0 0.0" origin_rpy="0.0 0.0 0.0"
+         axis_xyz="1 0 0" parent="lift" child="pull_mech_v" limit_e="1000.0" limit_v="2" 
+         limit_l="0" limit_u="${0.6*lx}"/>
+
+    <transmission name="trans_lift_to_pull_mech_v">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="lift_to_pull_mech_v">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor_lift_to_pull_mech_v">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+    <m_cylinder name="pull_mech_h" length="${hph}" radius="${hpr}" origin_rpy="0.0 1.57 0.0" origin_xyz="${vpx/2} 0.0 0.0"
+             mass="${hpm}"
+              ixx="${hpm*(3*hpr*hpr+hph*hph)/12}" ixy="0" ixz="0"
+              iyy="${hpm*(3*hpr*hpr+hph*hph)/12}" iyz="0"
+              izz="${(hpm*hpr*hpr)/2}"/>
+ 
+    <f_joint name="pull_mech_v_to_pull_mech_h" type="fixed" origin_xyz="0.0 0.0 0.2" origin_rpy="0.0 0.0 0.0"
+             parent="pull_mech_v" child="pull_mech_h"/>-->
+
+      <m_cylinder name="laser_scan" length="${lsh}" radius="${lsr}" origin_rpy="0.0 0.0 0.0" origin_xyz="0 0 0.05"
+             mass="${lsm}"
+              ixx="${lsm*(3*lsr*lsr+lsh*lsh)/12}" ixy="0" ixz="0"
+              iyy="${lsm*(3*lsr*lsr+lsh*lsh)/12}" iyz="0"
+              izz="${(hpm*hpr*hpr)/2}"/>
+      <f_joint name="laser_scanner_chassis" type="fixed" origin_xyz="0 0 ${lz+loz}" origin_rpy="0.0 0.0 0.0"
+             parent="load" child="laser_scan"/>
+
+    <gazebo>
+    <plugin name="gazebo_ros_plugin" filename="libgazebo_ros_control.so">
+    <!--<robotNamespace>/mrm</robotNamespace>-->
+    <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+    <legacyModeNS>true</legacyModeNS>
+    </plugin>
+  </gazebo>
+
+</robot>

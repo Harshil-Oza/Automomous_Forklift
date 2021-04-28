@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+
+<robot name="test"  xmlns:xacro="http://www.ros.org/wiki/xacro">
+<xacro:include filename="$(find my_urdf)/urdf/joints_links.xacro"/>
+<xacro:include filename="$(find my_urdf)/urdf/forklift.plugin.xacro"/>
+
+<xacro:property name="cx" value="0.41"/>     
+<xacro:property name="cy" value="0.41"/>     
+<xacro:property name="cz" value="0.2"/>     
+<xacro:property name="cm" value="30"/>
+
+<m_box name="chassis" size="${cx} ${cy} ${cz}" origin_rpy="0.0 0.0 0.0" origin_xyz="0.0 0.0 ${(cz/2)+0.081}"
+        mass="${cm}"
+        ixx="${cm*(cz*cz+cy*cy)/12}" ixy="0" ixz="0"
+        iyy="${cm*(cx*cx+cz*cz)/12}" iyz="0"
+        izz="${cm*(cy*cy+cx*cx)/12}"/>
+
+
+</robot>
+

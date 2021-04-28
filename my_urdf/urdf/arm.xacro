@@ -1,0 +1,83 @@
+<?xml version="1.0"?>
+
+<robot name="arm"  xmlns:xacro="http://www.ros.org/wiki/xacro">
+<xacro:include filename="$(find my_urdf)/urdf/joints_links.xacro"/>
+
+
+<m_box name="base_link" size="1 1 1" origin_rpy="0.0 0.0 0.0" origin_xyz="0.0 0.0 0.5"
+        mass="1024"
+        ixx="170.667" ixy="0" ixz="0"
+        iyy="170.667" iyz="0"
+        izz="170.667"/>
+
+<m_joint name="base_link_to_link_01" type="revolute" origin_xyz="0.0 0.0 0.5" origin_rpy="0.0 0.0 1"
+         axis_xyz="0 0 1" parent="base_link" child="link_01" limit_e="1000.0" limit_v="0.5" 
+         limit_l="-3.14" limit_u="3.14"/>
+
+<transmission name="trans_base_link_to_link_01">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="base_link_to_link_01">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor_base_link_to_link_01">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+<m_cylinder name="link_01" length="0.4" radius="0.4" origin_rpy="0.0 0.0 0.0" origin_xyz="0.0 0.0 0.2"
+             mass="157.633"
+              ixx="13.235" ixy="0" ixz="0"
+              iyy="13.235" iyz="0"
+              izz="9.655"/>
+<!--
+<m_joint name="link_01_to_link_02" type="revolute" axis_xyz="0 1 0" origin_xyz="0.0 0.0 0.4" 
+         origin_rpy="0.0 0.0 0.0" parent="link_01" child="link_02" limit_e='1000.0' limit_v="0.5"
+         limit_l="-3.14" limit_u="3.14"/>
+
+<transmission name="trans_link_01_to_link_02">
+      <type>transmission_interface/SimpleTransmission</type>
+      <joint name="base_link_01_to_link_02">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+      </joint>
+      <actuator name="motor_link_01_to_link_02">
+        <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+    </transmission>
+
+<m_cylinder name="link_02" length="0.8" radius="0.15" origin_xyz="0.0 0.0 0.4" origin_rpy="0.0 0.0 0.0"
+            mass="157.633"
+              ixx="13.235" ixy="0" ixz="0"
+              iyy="13.235" iyz="0"
+              izz="9.655"/>
+
+<m_joint name="link_02_to_link_03" type="revolute" axis_xyz="0 1 0" origin_rpy="0.0 0.0 0.0" 
+         origin_xyz="0.0 0.0 0.8" parent="link_02" child="link_03" limit_e="1000.0" limit_v="0.5"
+         limit_l="-3.14" limit_u="3.14"/>
+
+<m_cylinder name="link_03" length="0.8" radius="0.15" origin_xyz="0.0 0.0 0.4" origin_rpy="0.0 0.0 0.0"
+            mass="157.633"
+              ixx="13.235" ixy="0" ixz="0"
+              iyy="13.235" iyz="0"
+              izz="9.655"/>
+
+
+<m_joint name="link_03_to_link_04" type="revolute" axis_xyz="0 1 0" origin_xyz="0.0 0.0 0.8" 
+         origin_rpy="0.0 0.0 0.0" parent="link_03" child="link_04" limit_e='1000.0' limit_v="0.5"
+         limit_l="-3.14" limit_u="3.14"/>    
+
+<m_cylinder name="link_04" length="0.8" radius="0.15" origin_xyz="0.0 0.0 0.4" origin_rpy="0.0 0.0 0.0"
+            mass="157.633"
+              ixx="13.235" ixy="0" ixz="0"
+              iyy="13.235" iyz="0"
+              izz="9.655"/>            
+  <gazebo>
+    <plugin name="gazebo_ros_plugin" filename="libgazebo_ros_control.so">
+    <robotNamespace>/mrm</robotNamespace>
+    <robotSimType>gazebo_ros_control/DefaultRobotHWSim</robotSimType>
+    <legacyModeNS>true</legacyModeNS>
+    </plugin>
+  </gazebo> -->
+
+</robot>  
